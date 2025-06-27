@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../static/images/icon.png">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900" rel="stylesheet">
+
+    <title>PicFlix</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/profile.css">
+    <link rel="stylesheet" href="../static/css/select-categories.css">
+
+</head>
+<body>
+
+<header id="header">
+    <div class="logo-section">
+        <a href="#" id="logo" title="PicFlix">
+            PicFlix
+        </a>
+        <img class="img-icon" src="../static/images/תו.png" width="50px" height="50px" alt="">
+    </div>
+</header>
+
+<div class="container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        {% if user.profile_image %}
+        <img src="https://res.cloudinary.com/dc583pymo/image/upload/v1750974634/{{user.profile_image}}"
+             alt="Profile Picture"
+             class="profile-avatar">
+        {% else %}
+        <div class="profile-avatar fallback-avatar">
+            {{ user.users_name[0] | upper }}
+        </div>
+        {% endif %}
+
+        <div class="profile-info">
+            <h1>{{ user.users_name }}</h1>
+
+
+            <p class="profile-text-display" id="profile_text_display">
+                {{ 'No profile description yet.' if user.profile_text is none else user.profile_text }}
+
+
+            </p>
+
+
+            <p class="profile-meta">
+                <i class="fas fa-calendar-alt"></i>
+                Joined: {{ user.created_at.strftime('%d/%m/%Y') }} • {{ videos|length }} videos
+            </p>
+        </div>
+    </div>
+
+    <!-- Edit Sections (only for profile owner) -->
+    {% if profile_user_id == logged_user_id %}
+    <div class="edit-sections">
+
+        <!-- Grid for Profile Text and Image side by side -->
+        <div class="profile-edit-grid">
+            <!-- Edit Profile Text -->
+            <form class="profile-text-form" id="profile-text-form" data-user-id="{{ user.users_id }}">
+                <h3><i class="fas fa-edit"></i> Edit Profile Description</h3>
+                <label for="profile_text">Profile description:</label>
+                <textarea id="profile_text" name="profile_text" rows="4"
+                          cols="50">{{ user.profile_text or '' }}</textarea>
+
+
+                <button type="submit" class="upload-btn" id="saveTextButton" disabled>
+                    <i class="fas fa-save"></i> Save Text
+                </button>
+                <div class="save-status2" id="text-save-status" style="display: none;">
+                    <i class="fas fa-check-circle"></i> Text saved successfully!
+                </div>
+            </form>
+
+            <!-- Edit Profile Image -->
+            <div class="form-section">
+                <h3><i class="fas fa-camera"></i> Profile Image</h3>
+                <form class="file-upload-section" method="POST" enctype="multipart/form-data">
+                    <div class="file-input2-wrapper">
+                        <div class="file-input2">
+                            <label>
+                                <input type="file" name="profile_image" accept="image/*" id="profileImageInput"
+                                       style="display: none;">
+                                <div class="file-input2-text" id="fileInputLabel">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span id="fileNameText">Click to upload a profile image</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" name="action" value="update" class="upload-btn" id="updateImageButton"
+                                disabled>
+                            <i class="fas fa-upload"></i> Update Image
+                        </button>
+                        <button type="submit" name="action" value="remove" class="btn btn-secondary">
+                            <i class="fas fa-trash"></i> Remove Image
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <form class="categories-section" id="categories-form">
+            <h3><i class="fas fa-tags"></i> Categories</h3>
+            <div class="categories-grid">
+                {% for id, name in categories %}
+                <div class="category-item">
+                    <input type="checkbox" name="categories" value="{{ id }}"
+                           {% if id in categories_user %}checked{% endif %}>
+                    <label>{{ name }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="upload-btn" id="saveCategoriesButton" disabled>
+                <i class="fas fa-save"></i> Save Categories
+            </button>
+            <div class="save-status2" id="save-status" style="display: none;">
+                <i class="fas fa-check-circle"></i> Categories saved successfully!
+            </div>
+        </form>
+
+
+    </div>
+    {% endif %}
+
+    <!-- Upload Section -->
+    {% if profile_user_id == logged_user_id %}
+    <div class="upload-section">
+        <h2><i class="fas fa-cloud-upload-alt"></i> Upload New Video</h2>
+        <form method="post" action="/upload_video" enctype="multipart/form-data">
+
+            <!-- Category Selection -->
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-tags"></i> Categories (must select at least one)</label>
+                <div class="multi-select-container">
+                    <div class="multi-select-dropdown" onclick="toggleDropdown()">
+                        <div class="selected-categories" id="selectedCategories">
+                            <span style="color: #9ca3af;">Select categories...</span>
+                        </div>
+                        <i class="fas fa-chevron-down dropdown-arrow" id="dropdownArrow"></i>
+                    </div>
+                    <div class="multi-select-options" id="categoryOptions">
+                        {% for id, name in categories %}
+                        <div class="option-item" onclick="toggleCategory('{{ id }}', '{{ name }}')">
+                            <input type="checkbox" name="category_id[]" value="{{ id }}" id="cat{{ id }}">
+                            <label for="cat{{ id }}">{{ name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Selection -->
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-video"></i> Video File</label>
+                <div class="file-input-wrapper">
+                    <div class="file-input">
+                        <input type="file" name="file" accept="video/*" required onchange="updateFileName(this)">
+                        <span id="fileText">🎥 Click to select video file or drag here</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="upload-btn" id="uploadBtn" disabled>
+                <i class="fas fa-upload"></i> Upload Video
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Videos Section -->
+    <div class="videos-section">
+        <h2><i class="fas fa-play-circle"></i> My Videos</h2>
+
+        {% if videos %}
+        <div class="videos-wrapper">
+            <div class="videos-grid">
+                {% for video_id, video_url in videos %}
+                <div class="video-card">
+                    <video controls>
+                        <source src="https://res.cloudinary.com/dc583pymo/video/upload/v1750974849/{{ video_url }}"
+                                type="video/mp4">
+                        Your browser does not support the video player.
+                    </video>
+                    <div class="video-info">
+                        <div class="video-meta">
+                            <div class="video-title">{{ video_url }}</div>
+                            <div class="video-date">{{ current_date or '' }}</div>
+                        </div>
+
+                        {% if profile_user_id == logged_user_id %}
+                        <form method="post" action="/delete_video" style="display:inline;">
+                            <input type="hidden" name="video_url" value="{{ video_url }}">
+                            <input type="hidden" name="video_id" value="{{ video_id }}">
+                            <button type="submit" class="delete-btn" title="Delete Video">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="no-videos">
+            <i class="fas fa-video-slash"></i>
+            <p>You haven't uploaded any videos yet</p>
+            <p style="margin-top: 8px; font-size: 0.9em;">Start uploading to build your profile!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Delete Video Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <h3>Delete Video</h3>
+            <p>Are you sure you want to delete this video? This action cannot be undone.</p>
+            <form id="deleteForm" method="post" action="/delete_video">
+                <input type="hidden" name="video_id" id="modalVideoId">
+                <input type="hidden" name="video_url" id="modalVideoUrl">
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn cancel" onclick="closeDeleteModal()">Cancel</button>
+                    <button type="submit" class="modal-btn confirm">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="../static/js/categories.js"></script>
+<script src="../static/js/profile.js"></script>
+<script src="../static/js/profile-categories-and-text.js"></script>
+<script src="../static/js/profile-image.js"></script>
+<script src="../static/js/profile-btn.js"></script>
+
+</body>
+</html>

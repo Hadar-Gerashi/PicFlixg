@@ -1,0 +1,106 @@
+/* Custom Multi-Select */
+.multi-select-container {
+    position: relative;
+}
+
+.multi-select-dropdown {
+    width: 96%;
+    padding: 16px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 30px;
+    transition: all 0.3s ease;
+}
+
+.multi-select-dropdown:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.multi-select-dropdown.active {
+    border-color: #db2777;
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.1);
+}
+
+.selected-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.category-tag {
+    background: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.category-tag .remove {
+    cursor: pointer;
+    font-size: 0.8em;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.category-tag .remove:hover {
+    opacity: 1;
+}
+
+.dropdown-arrow {
+    transition: transform 0.3s ease;
+    color: #9ca3af;
+}
+
+.dropdown-arrow.rotated {
+    transform: rotate(180deg);
+}
+
+.multi-select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    margin-top: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+}
+
+.multi-select-options.show {
+    display: block;
+}
+
+.option-item {
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background-color 0.2s ease;
+    font-weight: 400;
+}
+
+.option-item:hover {
+    background: rgba(219, 39, 119, 0.1);
+}
+
+.option-item input[type="checkbox"] {
+    margin: 0;
+    accent-color: #db2777;
+}
