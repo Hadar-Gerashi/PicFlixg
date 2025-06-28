@@ -5,3 +5,4 @@ werkzeug>=3.1.0
 Jinja2==3.1.2
 cloudinary==1.39.0
 pyodbc>=5.0.0
+gunicorn
